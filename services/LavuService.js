@@ -2,9 +2,6 @@ import axios from 'axios'
 import convert from 'xml-js'
 import moment from 'moment'
 import qs from 'qs'
-import Logger from '../logger/Logger.js'
-
-const loggerGeneral = Logger()
 
 class LavuService {
   constructor() {
@@ -75,7 +72,6 @@ class LavuService {
   }
 
   async postRequest(params) {
-    // loggerGeneral.info(`GET ORDER DATA PARAMS: \n' ${qs.stringify(params)}`)
     const result = await axios.post(this.url, qs.stringify(params), this.config)
     return convert.xml2js(result.data, { ignoreComment: true }).elements[0]
     // return result.data;
