@@ -71,7 +71,7 @@ export async function cierreDeDiaHandler(req, res) {
     let lastDate = ''
 
     const cierreObj = await Cierres.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
-    const endDate = moment().format('YYYY-MM-DD HH:mm:ss')
+    const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
 
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate)
     let totalOrders = []
