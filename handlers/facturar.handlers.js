@@ -1,4 +1,4 @@
-import { getJsonForGuruSoft } from '../util/LavuToGuruSoft.js'
+import { getJsonForGuruSoft, padNumberWithZeros } from '../util/LavuToGuruSoft.js'
 import { getRowValue } from '../util/LavuOrderUtils.js'
 import { enviarFactura } from '../services/GuruSoftService.js'
 import LavuService from '../services/LavuService.js'
@@ -16,7 +16,16 @@ export async function facturarHandler(req, res) {
 
     const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft(req.body)
     console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
-    const resultadoFactura = await enviarFactura(jsonToGuruSoft)
+    let resultadoFactura = await enviarFactura(jsonToGuruSoft)
+
+    if (resultadoFactura.Estado === '15') {
+      // Documento duplicado, se actualiza consecutivo y se intenta de nuevo
+      const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
+      await consecutivoObj.update({ consecutivo: newConsecutivo })
+      jsonToGuruSoft.dNroDF = padNumberWithZeros(consecutivoObj.consecutivo, 10)
+      console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
+      resultadoFactura = await enviarFactura(jsonToGuruSoft)
+    }
 
     if (resultadoFactura.Estado === '2') {
       // Se emitió exitosamente la factura
@@ -28,11 +37,19 @@ export async function facturarHandler(req, res) {
         order: orderId,
         locacion: 'BolaDeOro',
       })
+
+      return res.json(resultadoFactura)
+    } else {
+      return res.status(500).json(resultadoFactura)
     }
-    return res.json(resultadoFactura)
   } catch (e) {
-    console.log('Error: ', e)
-    return res.status(500).json(e.response)
+    const axiosResponse = {
+      status: e.response.status,
+      statusText: e.response.statusText,
+      data: e.response.data,
+    }
+    console.log('Error: ', axiosResponse)
+    return res.status(500).json(axiosResponse)
   }
 }
 
@@ -100,14 +117,15 @@ export async function cierreDeDiaHandler(req, res) {
 
         if (resultadoFactura.Estado === '2') {
           // Se emitió exitosamente la factura
-          const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
-          await consecutivoObj.update({ consecutivo: newConsecutivo })
           ordenesExito.push(orderId)
           console.log('FACTURA CON EXITO: ', orderId)
         } else {
           console.log('---FACTURA CON ERROR: ', orderId)
           ordenesError.push(orderId)
         }
+
+        const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
+        await consecutivoObj.update({ consecutivo: newConsecutivo })
         await cierreObj.update({ ultimo: orderClosed })
 
         console.log('----- FINALIZA FACTURA ------')

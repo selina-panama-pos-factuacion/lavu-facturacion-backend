@@ -1,23 +1,29 @@
 import Consecutivos from '../models/consecutivos.js'
 import { getProductos, getRowValue } from './LavuOrderUtils.js'
-import jsonTemplate from './InvoiceTemplate.js'
+import getTemplate from './InvoiceTemplate.js'
 import LavuService from '../services/LavuService.js'
 
 export async function getJsonForGuruSoft(body) {
-  const jsonToGuruSoft = { ...jsonTemplate }
+  const jsonToGuruSoft = getTemplate()
   const {
     orderId,
-    esConsumidorFinal,
-    // codigoTipoDocumentoIdentidad,
-    // nombreRazonSocial,
-    // numeroDocumento,
-    // emailCliente,
-    // telefonoCliente,
+    esContribuyente,
+    labelUbicacion,
+    codigoTipoContribuyente,
+    digitoVerificador,
+    nombreRazonSocial,
+    numeroDocumento,
+    emailCliente,
+    tipoRuc,
+    paisSeleccionado,
+    codigoCorregimiento,
+    codigoDistrito,
+    codigoProvincia,
+    direccionCliente,
   } = body
 
   const consecutivoObj = await Consecutivos.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
   const orderInfo = await LavuService.getOrderGeneralInfo(orderId)
-  const pagoTarjeta = getRowValue(orderInfo.elements[0], 'card_paid')
   let total = getRowValue(orderInfo.elements[0], 'total')
   const tips = getRowValue(orderInfo.elements[0], 'gratuity')
   if (tips) total = (parseFloat(total) - parseFloat(tips)).toFixed(7)
@@ -32,10 +38,27 @@ export async function getJsonForGuruSoft(body) {
     currentDateTime.getSeconds(),
     2
   )}-05:00`
-
   jsonToGuruSoft.dFechaEm = formattedDateTime
-  if (!esConsumidorFinal) {
+
+  if (esContribuyente) {
     // Llenar datos de receptor
+    jsonToGuruSoft.Receptor.iTipoRec = `0${codigoTipoContribuyente}`
+    if (codigoTipoContribuyente === 4) {
+      //  Extranjero
+      jsonToGuruSoft.Receptor.dPaisExt = paisSeleccionado.nombre
+      jsonToGuruSoft.Receptor.dIdExt = numeroDocumento
+    } else {
+      jsonToGuruSoft.Receptor.dTipoRuc = `0${tipoRuc}`
+      jsonToGuruSoft.Receptor.dDV = digitoVerificador
+      jsonToGuruSoft.Receptor.dRuc = numeroDocumento
+      jsonToGuruSoft.Receptor.dCodUbi = `${codigoProvincia}-${codigoDistrito}-${codigoCorregimiento}`
+      jsonToGuruSoft.Receptor.dProv = labelUbicacion.split('-')[0].trim()
+      jsonToGuruSoft.Receptor.dDistr = labelUbicacion.split('-')[1].trim()
+      jsonToGuruSoft.Receptor.dCorreg = labelUbicacion.split('-')[2].trim()
+      jsonToGuruSoft.Receptor.dNombRec = nombreRazonSocial
+      jsonToGuruSoft.Receptor.dDirecRec = direccionCliente
+      jsonToGuruSoft.Receptor.dCorElectRec1 = emailCliente
+    }
   }
 
   const orderContents = await LavuService.getOrderContents(orderId)
@@ -43,7 +66,27 @@ export async function getJsonForGuruSoft(body) {
 
   jsonToGuruSoft.dNroDF = padNumberWithZeros(consecutivoObj.consecutivo, 10)
   jsonToGuruSoft.Detalle = productos
-  jsonToGuruSoft.FormaPago[0].iFormaPago = pagoTarjeta === '0.00' ? '02' : '03'
+
+  // Forma de pago
+  const orderPaymentInfo = await LavuService.getOrderPayments(orderId)
+  const metodoPago = getRowValue(orderPaymentInfo.elements[0], 'pay_type')
+  let codigoMetodoPago = '02' // Pago en efectivo
+  switch (metodoPago) {
+    case 'Uber':
+    case 'Pedidos Ya':
+    case 'Asap':
+    case 'ACH':
+    case 'YaPPI':
+      codigoMetodoPago = '08' // Transferencia bancaria
+      break
+    case 'Card':
+      codigoMetodoPago = '03' // Tarjeta credito
+      break
+    case 'Cxc':
+      codigoMetodoPago = '01' // Credito (cuenta por cobrar)
+      break
+  }
+  jsonToGuruSoft.FormaPago[0].iFormaPago = codigoMetodoPago
   jsonToGuruSoft.FormaPago[0].dVlrCuota = total
 
   jsonToGuruSoft.Total.dNroItems = productos.length
@@ -59,7 +102,7 @@ export async function getJsonForGuruSoft(body) {
   return { jsonToGuruSoft, consecutivoObj }
 }
 
-function padNumberWithZeros(numberString, desiredLength) {
+export function padNumberWithZeros(numberString, desiredLength) {
   return numberString.padStart(desiredLength, '0')
 }
 
