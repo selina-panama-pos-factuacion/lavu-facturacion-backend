@@ -159,3 +159,19 @@ export async function cierreDeDiaHandler(req, res) {
     res.end()
   }
 }
+
+export async function fechaCierreDeDiaHandler(req, res) {
+  try {
+    const cierreObj = await Cierres.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
+    res.json({
+      fecha: moment(cierreObj.ultimo).format('DD-MM-YYYY'),
+      hora: moment(cierreObj.ultimo).format('HH:mm:ss'),
+    })
+  } catch (error) {
+    const errorData = {
+      message: 'Internal Server Error',
+      error: error.message,
+    }
+    res.status(500).json(errorData)
+  }
+}

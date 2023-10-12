@@ -14,7 +14,6 @@ class LavuService {
   }
 
   async getEndOfDayOrders(startDate, endDate) {
-    endDate = '2023-09-19 14:59:26'
     const newStartDate = moment(startDate).add(1, 'seconds').format('YYYY-MM-DD HH:mm:ss')
     const params = {
       dataname: process.env.LAVU_DATA,
