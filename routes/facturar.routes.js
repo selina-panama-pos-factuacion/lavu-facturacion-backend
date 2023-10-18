@@ -5,7 +5,7 @@ import { validateBearerToken } from '../middleware/auth.middleware.js'
 const router = express.Router()
 
 router.post('/facturar', validateBearerToken, facturarHandler)
-router.get('/facturarCierreDeDia', validateBearerToken, cierreDeDiaHandler)
+router.get('/facturarCierreDeDia', cierreDeDiaHandler)
 router.get('/fechaCierreDeDia', validateBearerToken, fechaCierreDeDiaHandler)
 
 export default router
