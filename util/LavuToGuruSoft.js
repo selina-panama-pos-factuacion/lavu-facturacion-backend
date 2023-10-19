@@ -23,9 +23,7 @@ export async function getJsonForGuruSoft(body) {
   } = body
 
   const consecutivoObj = await Consecutivos.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
-  console.log('🚀 ~ file: LavuToGuruSoft.js:26 ~ getJsonForGuruSoft ~ consecutivoObj:', consecutivoObj)
   const orderInfo = await LavuService.getOrderGeneralInfo(orderId)
-  console.log('🚀 ~ file: LavuToGuruSoft.js:27 ~ getJsonForGuruSoft ~ orderInfo:', orderInfo)
   let total = getRowValue(orderInfo.elements[0], 'total')
   const tips = getRowValue(orderInfo.elements[0], 'gratuity')
   if (tips) total = (parseFloat(total) - parseFloat(tips)).toFixed(7)
