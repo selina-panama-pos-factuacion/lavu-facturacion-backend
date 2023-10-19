@@ -74,6 +74,7 @@ class LavuService {
   async postRequest(params) {
     try {
       const result = await axios.post(this.url, qs.stringify(params), this.config)
+      console.log('--POST REQUEST RESULT', result)
       return convert.xml2js(result.data, { ignoreComment: true }).elements[0]
     } catch (error) {
       console.error('Error en POST request:', error)
