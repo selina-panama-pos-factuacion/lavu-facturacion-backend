@@ -98,12 +98,11 @@ export async function cierreDeDiaHandler(req, res) {
       const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'BolaDeOro' } })
       if (facturada) {
         console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
-        break
+        continue
       }
 
       console.log('----- INICIA FACTURA ------')
       const total = getRowValue(order, 'total')
-      const orderClosed = getRowValue(order, 'closed')
 
       if (total === '0.00') {
         ordenesEnCero.push(orderId)
@@ -126,10 +125,13 @@ export async function cierreDeDiaHandler(req, res) {
 
         const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
         await consecutivoObj.update({ consecutivo: newConsecutivo })
-        await cierreObj.update({ ultimo: orderClosed })
 
         console.log('----- FINALIZA FACTURA ------')
       }
+
+      const orderClosed = getRowValue(order, 'closed')
+      await cierreObj.update({ ultimo: orderClosed })
+
       console.log('ORDENES EXITO: ', ordenesExito.length)
       console.log('ORDENES EN CERO: ', ordenesEnCero.length)
       console.log('ORDENES ERROR: ', ordenesError.length)
@@ -137,8 +139,6 @@ export async function cierreDeDiaHandler(req, res) {
       const progressRoundUp = Math.ceil(progress)
       res.write(`data: {"progress": ${progressRoundUp > 100 ? 100 : progressRoundUp}}\n\n`)
     }
-
-    await cierreObj.update({ ultimo: endDate })
 
     console.log('----- FINALIZA PROCESO ------')
     res.write(
