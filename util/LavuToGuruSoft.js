@@ -22,6 +22,9 @@ export async function getJsonForGuruSoft(body) {
     direccionCliente,
   } = body
 
+  // ---- DATOS DE ORDER INFO ----
+  console.log('----DATOS DE ORDER INFO ------')
+
   const consecutivoObj = await Consecutivos.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
   const orderInfo = await LavuService.getOrderGeneralInfo(orderId)
   let total = getRowValue(orderInfo.elements[0], 'total')
@@ -39,6 +42,9 @@ export async function getJsonForGuruSoft(body) {
     2
   )}-05:00`
   jsonToGuruSoft.dFechaEm = formattedDateTime
+
+  // ---- RECEPTOR ----
+  console.log('---- RECEPTOR ----')
 
   if (esContribuyente) {
     // Llenar datos de receptor
@@ -61,13 +67,18 @@ export async function getJsonForGuruSoft(body) {
     }
   }
 
+  // ---- PRODUCTOS ----
+  console.log('---- PRODUCTOS ----')
+
   const orderContents = await LavuService.getOrderContents(orderId)
   const productos = getProductos(orderContents, exentoImpuesto)
 
   jsonToGuruSoft.dNroDF = padNumberWithZeros(consecutivoObj.consecutivo, 10)
   jsonToGuruSoft.Detalle = productos
 
-  // Forma de pago
+  // ---- FORMA DE PAGO ----
+  console.log('---- FORMA DE PAGO ----')
+
   const orderPaymentInfo = await LavuService.getOrderPayments(orderId)
   const metodoPago = getRowValue(orderPaymentInfo.elements[0], 'pay_type')
   let codigoMetodoPago = '02' // Pago en efectivo
@@ -88,6 +99,9 @@ export async function getJsonForGuruSoft(body) {
   }
   jsonToGuruSoft.FormaPago[0].iFormaPago = codigoMetodoPago
   jsonToGuruSoft.FormaPago[0].dVlrCuota = total
+
+  // ---- TOTALES ----
+  console.log('---- TOTALES ----')
 
   jsonToGuruSoft.Total.dNroItems = productos.length
   jsonToGuruSoft.Total.dTotNeto = subtotal
