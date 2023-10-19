@@ -68,10 +68,12 @@ export async function getJsonForGuruSoft(body) {
   }
 
   // ---- PRODUCTOS ----
-  console.log('---- PRODUCTOS ----')
+  console.log('---- PRODUCTOS 1----')
 
   const orderContents = await LavuService.getOrderContents(orderId)
+  console.log('---- PRODUCTOS 2----')
   const productos = getProductos(orderContents, exentoImpuesto)
+  console.log('---- PRODUCTOS 3----')
 
   jsonToGuruSoft.dNroDF = padNumberWithZeros(consecutivoObj.consecutivo, 10)
   jsonToGuruSoft.Detalle = productos
