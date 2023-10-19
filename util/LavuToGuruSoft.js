@@ -77,10 +77,12 @@ export async function getJsonForGuruSoft(body) {
   jsonToGuruSoft.Detalle = productos
 
   // ---- FORMA DE PAGO ----
-  console.log('---- FORMA DE PAGO ----')
+  console.log('---- FORMA DE PAGO 1----')
 
   const orderPaymentInfo = await LavuService.getOrderPayments(orderId)
+  console.log('---- FORMA DE PAGO 2----')
   const metodoPago = getRowValue(orderPaymentInfo.elements[0], 'pay_type')
+  console.log('---- FORMA DE PAGO 3----')
   let codigoMetodoPago = '02' // Pago en efectivo
   switch (metodoPago) {
     case 'Uber':
@@ -97,6 +99,7 @@ export async function getJsonForGuruSoft(body) {
       codigoMetodoPago = '01' // Credito (cuenta por cobrar)
       break
   }
+  console.log('---- FORMA DE PAGO 4----')
   jsonToGuruSoft.FormaPago[0].iFormaPago = codigoMetodoPago
   jsonToGuruSoft.FormaPago[0].dVlrCuota = total
 
