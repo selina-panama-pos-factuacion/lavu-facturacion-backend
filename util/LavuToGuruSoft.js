@@ -23,10 +23,11 @@ export async function getJsonForGuruSoft(body) {
   } = body
 
   // ---- DATOS DE ORDER INFO ----
-  console.log('----DATOS DE ORDER INFO ------')
 
   const consecutivoObj = await Consecutivos.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
+  console.log('----DATOS DE ORDER INFO 1------')
   const orderInfo = await LavuService.getOrderGeneralInfo(orderId)
+  console.log('----DATOS DE ORDER INFO 2------')
   let total = getRowValue(orderInfo.elements[0], 'total')
   const tips = getRowValue(orderInfo.elements[0], 'gratuity')
   if (tips) total = (parseFloat(total) - parseFloat(tips)).toFixed(7)
@@ -69,7 +70,6 @@ export async function getJsonForGuruSoft(body) {
 
   // ---- PRODUCTOS ----
   console.log('---- PRODUCTOS 1----')
-
   const orderContents = await LavuService.getOrderContents(orderId)
   console.log('---- PRODUCTOS 2----')
   const productos = getProductos(orderContents, exentoImpuesto)
@@ -80,7 +80,6 @@ export async function getJsonForGuruSoft(body) {
 
   // ---- FORMA DE PAGO ----
   console.log('---- FORMA DE PAGO 1----')
-
   const orderPaymentInfo = await LavuService.getOrderPayments(orderId)
   console.log('---- FORMA DE PAGO 2----')
   const metodoPago = getRowValue(orderPaymentInfo.elements[0], 'pay_type')
