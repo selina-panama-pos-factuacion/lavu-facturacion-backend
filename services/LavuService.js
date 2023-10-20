@@ -76,8 +76,13 @@ class LavuService {
       const result = await axios.post(this.url, qs.stringify(params), this.config)
       console.log('--POST REQUEST RESULT', JSON.stringify(result.data))
       return convert.xml2js(result.data, { ignoreComment: true }).elements[0]
-    } catch (error) {
-      console.error('Error en POST request:', error)
+    } catch (e) {
+      const axiosResponse = {
+        status: e.response.status,
+        statusText: e.response.statusText,
+        data: e.response.data,
+      }
+      console.error('Error: ', axiosResponse)
       return false
     }
   }
