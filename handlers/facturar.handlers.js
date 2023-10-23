@@ -109,10 +109,9 @@ export async function cierreDeDiaHandler(req, res) {
         ordenesEnCero.push(orderId)
         console.log('ORDEN EN CERO: ', orderId)
       } else {
-        const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true })
-        console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
-
         try {
+          const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true })
+          console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
           const resultadoFactura = await enviarFactura(jsonToGuruSoft)
           console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
@@ -124,14 +123,13 @@ export async function cierreDeDiaHandler(req, res) {
             console.log('---FACTURA CON ERROR: ', orderId)
             ordenesError.push(orderId)
           }
+          const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
+          await consecutivoObj.update({ consecutivo: newConsecutivo })
         } catch (error) {
           console.log('--ERROR--', error.message)
           console.log('---FACTURA CON ERROR: ', orderId)
           ordenesError.push(orderId)
         }
-
-        const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
-        await consecutivoObj.update({ consecutivo: newConsecutivo })
 
         console.log('----- FINALIZA FACTURA ------')
       }
