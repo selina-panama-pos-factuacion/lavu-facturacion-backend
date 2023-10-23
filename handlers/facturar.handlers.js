@@ -62,6 +62,7 @@ export async function cierreDeDiaHandler(req, res) {
   let isConnectionOpen = true
 
   req.on('close', () => {
+    console.log('--- CONEXION CERRADA POR CLIENTE ---')
     res.end()
     isConnectionOpen = false
   })

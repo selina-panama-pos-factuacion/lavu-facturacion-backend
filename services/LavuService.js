@@ -74,7 +74,7 @@ class LavuService {
   async postRequest(params) {
     try {
       const result = await axios.post(this.url, qs.stringify(params), this.config)
-      console.log('--POST REQUEST RESULT', JSON.stringify(result.data))
+      // console.log('--POST REQUEST RESULT', JSON.stringify(result.data))
       return convert.xml2js(result.data, { ignoreComment: true }).elements[0]
     } catch (e) {
       const axiosResponse = {
