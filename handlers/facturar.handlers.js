@@ -115,17 +115,17 @@ export async function cierreDeDiaHandler(req, res) {
         try {
           const resultadoFactura = await enviarFactura(jsonToGuruSoft)
           console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
+
+          if (resultadoFactura && resultadoFactura.Estado === '2') {
+            // Se emitió exitosamente la factura
+            ordenesExito.push(orderId)
+            console.log('FACTURA CON EXITO: ', orderId)
+          } else {
+            console.log('---FACTURA CON ERROR: ', orderId)
+            ordenesError.push(orderId)
+          }
         } catch (error) {
           console.log('--ERROR--', error.message)
-          console.log('---FACTURA CON ERROR: ', orderId)
-          ordenesError.push(orderId)
-        }
-
-        if (resultadoFactura.Estado === '2') {
-          // Se emitió exitosamente la factura
-          ordenesExito.push(orderId)
-          console.log('FACTURA CON EXITO: ', orderId)
-        } else {
           console.log('---FACTURA CON ERROR: ', orderId)
           ordenesError.push(orderId)
         }
