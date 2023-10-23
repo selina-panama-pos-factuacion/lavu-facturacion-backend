@@ -112,8 +112,14 @@ export async function cierreDeDiaHandler(req, res) {
         const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true })
         console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
 
-        const resultadoFactura = await enviarFactura(jsonToGuruSoft)
-        console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
+        try {
+          const resultadoFactura = await enviarFactura(jsonToGuruSoft)
+          console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
+        } catch (error) {
+          console.log('--ERROR--', error.message)
+          console.log('---FACTURA CON ERROR: ', orderId)
+          ordenesError.push(orderId)
+        }
 
         if (resultadoFactura.Estado === '2') {
           // Se emitió exitosamente la factura
