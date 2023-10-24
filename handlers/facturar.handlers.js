@@ -188,8 +188,6 @@ export async function cierreDeDiaPostHandler(req, res) {
     const ordenesEnCero = []
 
     for (const order of totalOrders) {
-      if (!isConnectionOpen) break
-
       const orderId = getRowValue(order, 'order_id')
       console.log(`|-- EN PROCESO: ${orderId} --|`)
       const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'BolaDeOro' } })
