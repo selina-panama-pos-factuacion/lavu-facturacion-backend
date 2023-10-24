@@ -188,7 +188,7 @@ export async function cierreDeDiaPostHandler(req, res) {
     const ordenesError = []
     const ordenesEnCero = []
 
-    const currentOrder = 1
+    let currentOrder = 1
 
     for (const order of totalOrders) {
       const orderId = getRowValue(order, 'order_id')
