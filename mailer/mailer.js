@@ -5,7 +5,7 @@ export async function sendMail(data) {
     service: 'gmail',
     auth: {
       user: 'selina.facturacion.panama@gmail.com', // your email
-      pass: 'SelinaFacturas@23', // your email password
+      pass: 'zjgu iots wszn efmh', // your email password
     },
   })
 
