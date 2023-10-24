@@ -23,7 +23,7 @@ function jsonToHtml(data) {
   let html = '<h2>Resumen de Órdenes</h2>'
 
   // For ordenesExito
-  html += '<h3>Órdenes de Éxito (' + data.ordenesExito.count + ')</h3>'
+  html += '<h4>ÓRDENES FACTURADAS CON ÉXITO (' + data.ordenesExito.count + ') ✅</h4>'
   if (data.ordenesExito.count > 0) {
     html += '<ul>'
     data.ordenesExito.ordenes.forEach(order => {
@@ -35,7 +35,7 @@ function jsonToHtml(data) {
   }
 
   // For ordenesError
-  html += '<h3>Órdenes con Error (' + data.ordenesError.count + ')</h3>'
+  html += '<h4>ÓRDENES CON ERROR (' + data.ordenesError.count + ') ❌</h4>'
   if (data.ordenesError.count > 0) {
     html += '<ul>'
     data.ordenesError.ordenes.forEach(order => {
