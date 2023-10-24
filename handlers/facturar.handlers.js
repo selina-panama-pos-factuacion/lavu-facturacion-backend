@@ -1,6 +1,7 @@
 import { getJsonForGuruSoft, padNumberWithZeros } from '../util/LavuToGuruSoft.js'
 import { getRowValue } from '../util/LavuOrderUtils.js'
 import { enviarFactura } from '../services/GuruSoftService.js'
+import { sendMail } from '../mailer/mailer.js'
 import LavuService from '../services/LavuService.js'
 import Cierres from '../models/cierres.js'
 import FacturasContribuyentes from '../models/facturas_contribuyentes.js'
@@ -239,6 +240,11 @@ export async function cierreDeDiaPostHandler(req, res) {
     console.log('----- FINALIZA PROCESO ------')
 
     // Enviar Email
+    sendMail({
+      ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
+      ordenesError: { ordenes: ordenesError, count: ordenesError.length },
+    })
+
     res.json({
       ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
       ordenesError: { ordenes: ordenesError, count: ordenesError.length },
