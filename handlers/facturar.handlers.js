@@ -188,9 +188,12 @@ export async function cierreDeDiaPostHandler(req, res) {
     const ordenesError = []
     const ordenesEnCero = []
 
+    const currentOrder = 1
+
     for (const order of totalOrders) {
       const orderId = getRowValue(order, 'order_id')
       console.log(`|-- EN PROCESO: ${orderId} --|`)
+      console.log(`|-- ORDEN ${currentOrder} DE ${totalOrders.length} --|`)
       const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'BolaDeOro' } })
       if (facturada) {
         console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
