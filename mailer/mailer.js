@@ -12,7 +12,7 @@ export async function sendMail(data) {
   let info = await transporter.sendMail({
     from: '"Facturacion Lavu" <selina.facturacion.panama@gmail.com>', // sender address
     to: 'gbermudezmora@gmail.com', // list of receivers
-    subject: 'Hello ✔', // subject line
+    subject: 'Resultado de cierre de día 🧾 ✅', // subject line
     html: jsonToHtml(data), // plain text body
   })
 
