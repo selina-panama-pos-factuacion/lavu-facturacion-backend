@@ -176,7 +176,7 @@ export async function cierreDeDiaPostHandler(req, res) {
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate)
     let totalOrders = []
 
-    while (!!orders.elements && orders.elements.length > 1 && isConnectionOpen) {
+    while (!!orders.elements && orders.elements.length > 1) {
       totalOrders.push(...orders.elements)
       orderCount += orders.elements.length
       lastDate = getRowValue(orders.elements[orders.elements.length - 1], 'closed')
