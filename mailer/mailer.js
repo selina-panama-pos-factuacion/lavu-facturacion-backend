@@ -14,7 +14,6 @@ export async function sendMail(data) {
     to: 'gbermudezmora@gmail.com', // list of receivers
     subject: 'Hello ✔', // subject line
     text: JSON.stringify(data), // plain text body
-    html: '<b>Hello world?</b>', // html body
   })
 
   console.log('Message sent: %s', info.messageId)
