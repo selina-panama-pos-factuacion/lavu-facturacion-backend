@@ -166,93 +166,92 @@ export async function cierreDeDiaHandler(req, res) {
 }
 
 export async function cierreDeDiaPostHandler(req, res) {
-  console.log(moment().format('YYYY-MM-DD HH:mm:ss'))
-  // try {
-  //   let orderCount = 0
-  //   let lastDate = ''
+  try {
+    let orderCount = 0
+    let lastDate = ''
 
-  //   const cierreObj = await Cierres.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
-  //   const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
+    const cierreObj = await Cierres.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
+    const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
 
-  //   let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate)
-  //   let totalOrders = []
+    let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate)
+    let totalOrders = []
 
-  //   while (!!orders.elements && orders.elements.length > 1 && isConnectionOpen) {
-  //     totalOrders.push(...orders.elements)
-  //     orderCount += orders.elements.length
-  //     lastDate = getRowValue(orders.elements[orders.elements.length - 1], 'closed')
-  //     orders = await LavuService.getEndOfDayOrders(lastDate, endDate)
-  //   }
+    while (!!orders.elements && orders.elements.length > 1 && isConnectionOpen) {
+      totalOrders.push(...orders.elements)
+      orderCount += orders.elements.length
+      lastDate = getRowValue(orders.elements[orders.elements.length - 1], 'closed')
+      orders = await LavuService.getEndOfDayOrders(lastDate, endDate)
+    }
 
-  //   const ordenesExito = []
-  //   const ordenesError = []
-  //   const ordenesEnCero = []
+    const ordenesExito = []
+    const ordenesError = []
+    const ordenesEnCero = []
 
-  //   for (const order of totalOrders) {
-  //     if (!isConnectionOpen) break
+    for (const order of totalOrders) {
+      if (!isConnectionOpen) break
 
-  //     const orderId = getRowValue(order, 'order_id')
-  //     console.log(`|-- EN PROCESO: ${orderId} --|`)
-  //     const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'BolaDeOro' } })
-  //     if (facturada) {
-  //       console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
-  //       continue
-  //     }
+      const orderId = getRowValue(order, 'order_id')
+      console.log(`|-- EN PROCESO: ${orderId} --|`)
+      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'BolaDeOro' } })
+      if (facturada) {
+        console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
+        continue
+      }
 
-  //     console.log('----- INICIA FACTURA ------')
-  //     const total = getRowValue(order, 'total')
+      console.log('----- INICIA FACTURA ------')
+      const total = getRowValue(order, 'total')
 
-  //     if (total === '0.00') {
-  //       ordenesEnCero.push(orderId)
-  //       console.log('ORDEN EN CERO: ', orderId)
-  //     } else {
-  //       try {
-  //         const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true })
-  //         console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
-  //         const resultadoFactura = await enviarFactura(jsonToGuruSoft)
-  //         console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
+      if (total === '0.00') {
+        ordenesEnCero.push(orderId)
+        console.log('ORDEN EN CERO: ', orderId)
+      } else {
+        try {
+          const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true })
+          console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
+          const resultadoFactura = await enviarFactura(jsonToGuruSoft)
+          console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
-  //         if (resultadoFactura && resultadoFactura.Estado === '2') {
-  //           // Se emitió exitosamente la factura
-  //           ordenesExito.push(orderId)
-  //           console.log('FACTURA CON EXITO: ', orderId)
-  //         } else {
-  //           console.log('---FACTURA CON ERROR: ', orderId)
-  //           ordenesError.push(orderId)
-  //         }
-  //         const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
-  //         await consecutivoObj.update({ consecutivo: newConsecutivo })
-  //       } catch (error) {
-  //         console.log('--ERROR--', error.message)
-  //         console.log('---FACTURA CON ERROR: ', orderId)
-  //         ordenesError.push(orderId)
-  //       }
+          if (resultadoFactura && resultadoFactura.Estado === '2') {
+            // Se emitió exitosamente la factura
+            ordenesExito.push(orderId)
+            console.log('FACTURA CON EXITO: ', orderId)
+          } else {
+            console.log('---FACTURA CON ERROR: ', orderId)
+            ordenesError.push(orderId)
+          }
+          const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
+          await consecutivoObj.update({ consecutivo: newConsecutivo })
+        } catch (error) {
+          console.log('--ERROR--', error.message)
+          console.log('---FACTURA CON ERROR: ', orderId)
+          ordenesError.push(orderId)
+        }
 
-  //       console.log('----- FINALIZA FACTURA ------')
-  //     }
+        console.log('----- FINALIZA FACTURA ------')
+      }
 
-  //     const orderClosed = getRowValue(order, 'closed')
-  //     await cierreObj.update({ ultimo: orderClosed })
+      const orderClosed = getRowValue(order, 'closed')
+      await cierreObj.update({ ultimo: orderClosed })
 
-  //     console.log('ORDENES EXITO: ', ordenesExito.length)
-  //     console.log('ORDENES EN CERO: ', ordenesEnCero.length)
-  //     console.log('ORDENES ERROR: ', ordenesError.length)
-  //   }
+      console.log('ORDENES EXITO: ', ordenesExito.length)
+      console.log('ORDENES EN CERO: ', ordenesEnCero.length)
+      console.log('ORDENES ERROR: ', ordenesError.length)
+    }
 
-  //   console.log('----- FINALIZA PROCESO ------')
+    console.log('----- FINALIZA PROCESO ------')
 
-  //   // Enviar Email
-  //   res.json({
-  //     ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
-  //     ordenesError: { ordenes: ordenesError, count: ordenesError.length },
-  //   })
-  // } catch (error) {
-  //   const errorData = {
-  //     message: 'Internal Server Error',
-  //     error: error.message,
-  //   }
-  //   res.status(500).json(errorData)
-  // }
+    // Enviar Email
+    res.json({
+      ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
+      ordenesError: { ordenes: ordenesError, count: ordenesError.length },
+    })
+  } catch (error) {
+    const errorData = {
+      message: 'Internal Server Error',
+      error: error.message,
+    }
+    res.status(500).json(errorData)
+  }
 }
 
 export async function fechaCierreDeDiaHandler(req, res) {
