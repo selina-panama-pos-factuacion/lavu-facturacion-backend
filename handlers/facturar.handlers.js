@@ -255,6 +255,7 @@ export async function cierreDeDiaPostHandler(req, res) {
       message: 'Internal Server Error',
       error: error.message,
     }
+    sendMail(errorData)
     res.status(500).json(errorData)
   }
 }

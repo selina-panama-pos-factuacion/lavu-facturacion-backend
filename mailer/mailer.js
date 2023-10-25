@@ -13,7 +13,7 @@ export async function sendMail(data) {
     from: '"Facturación Lavu" <selina.facturacion.panama@gmail.com>', // sender address
     to: 'gbermudezmora@gmail.com', // list of receivers casco@tacoslaneta.com
     subject: 'Resultado Cierre de Día 🧾 ✅', // subject line
-    html: jsonToHtml(data), // plain text body
+    html: isValidOrdenesResponse(data) ? jsonToHtml(data) : JSON.stringify(data), // plain text body
   })
 
   console.log('Message sent: %s', info.messageId)
@@ -47,4 +47,28 @@ function jsonToHtml(data) {
   }
 
   return html
+}
+
+function isValidOrdenesResponse(data) {
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+
+  const keys = ['ordenesExito', 'ordenesError']
+
+  for (const key of keys) {
+    if (!data[key] || typeof data[key] !== 'object') {
+      return false
+    }
+
+    if (!Array.isArray(data[key].ordenes)) {
+      return false
+    }
+
+    if (data[key].count !== data[key].ordenes.length) {
+      return false
+    }
+  }
+
+  return true
 }
