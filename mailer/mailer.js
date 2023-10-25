@@ -11,7 +11,7 @@ export async function sendMail(data) {
 
   let info = await transporter.sendMail({
     from: '"Facturación Lavu" <selina.facturacion.panama@gmail.com>', // sender address
-    to: 'gbermudezmora@gmail.com, casco@tacoslaneta.com', // list of receivers
+    to: 'gbermudezmora@gmail.com', // list of receivers casco@tacoslaneta.com
     subject: 'Resultado Cierre de Día 🧾 ✅', // subject line
     html: jsonToHtml(data), // plain text body
   })
@@ -20,16 +20,29 @@ export async function sendMail(data) {
 }
 
 function jsonToHtml(data) {
+  const COLUMN_THRESHOLD = 50 // Adjust this to change when a new column is started
+
+  function generateTableForOrders(orders) {
+    let table = '<table><tbody><tr>'
+
+    for (let i = 0; i < orders.length; i++) {
+      if (i !== 0 && i % COLUMN_THRESHOLD === 0) {
+        // Start a new column
+        table += '</tr><tr>'
+      }
+      table += `<td>${orders[i]}</td>`
+    }
+
+    table += '</tr></tbody></table>'
+    return table
+  }
+
   let html = '<h2>Resumen de Órdenes</h2>'
 
   // For ordenesExito
   html += '<h4>ÓRDENES FACTURADAS CON ÉXITO (' + data.ordenesExito.count + ') ✅</h4>'
   if (data.ordenesExito.count > 0) {
-    html += '<ul>'
-    data.ordenesExito.ordenes.forEach(order => {
-      html += '<li>' + order + '</li>'
-    })
-    html += '</ul>'
+    html += generateTableForOrders(data.ordenesExito.ordenes)
   } else {
     html += '<p>No hay órdenes de éxito.</p>'
   }
@@ -37,11 +50,7 @@ function jsonToHtml(data) {
   // For ordenesError
   html += '<h4>ÓRDENES CON ERROR (' + data.ordenesError.count + ') ❌</h4>'
   if (data.ordenesError.count > 0) {
-    html += '<ul>'
-    data.ordenesError.ordenes.forEach(order => {
-      html += '<li>' + order + '</li>'
-    })
-    html += '</ul>'
+    html += generateTableForOrders(data.ordenesError.ordenes)
   } else {
     html += '<p>No hay órdenes con error.</p>'
   }
