@@ -189,10 +189,10 @@ export async function cierreDeDiaPostHandler(req, res) {
     const ordenesEnCero = []
 
     let currentOrder = 1
+    res.json({ result: 'Cierre de día iniciado exitosamente!' })
 
     for (const order of totalOrders) {
       console.log('------ INICIA PROCESO -------')
-      res.json({ result: 'Cierre de día iniciado exitosamente!' })
       const orderId = getRowValue(order, 'order_id')
       console.log(`|-- EN PROCESO: ${orderId} --|`)
       console.log(`|-- ORDEN ${currentOrder} DE ${totalOrders.length} --|`)
@@ -256,7 +256,6 @@ export async function cierreDeDiaPostHandler(req, res) {
       error: error.message,
     }
     sendMail(errorData)
-    res.status(500).json(errorData)
   }
 }
 
