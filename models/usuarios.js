@@ -18,6 +18,10 @@ Usuarios.init(
       type: DataTypes.STRING(64),
       allowNull: false,
     },
+    locacion: {
+      type: DataTypes.STRING(64),
+      allowNull: false,
+    },
     nombre: {
       type: DataTypes.STRING(64),
       allowNull: true,

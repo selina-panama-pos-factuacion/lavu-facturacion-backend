@@ -1,4 +1,5 @@
 import { secret } from '../handlers/login.handlers.js'
+import locacionesConfig from '../config/locacionesConfig.js'
 import jwt from 'jsonwebtoken'
 
 export function validateBearerToken(req, res, next) {
@@ -14,9 +15,11 @@ export function validateBearerToken(req, res, next) {
       token = authHeader.slice(7) // Se le quita el 'Bearer '
     }
 
-    const userId = validateJwtToken(token)
+    const { userId, locacion } = validateJwtToken(token)
 
     req.userId = userId
+    req.locacion = locacion
+    req.locacionData = locacionesConfig[locacion]
     next()
   } catch (error) {
     return res.status(401).json({ error })
@@ -32,9 +35,9 @@ function validateJwtToken(token) {
       throw new Error('el token ya expiró')
     }
 
-    const userId = decodedToken.userId
+    const { userId, locacion } = decodedToken
 
-    return userId
+    return { userId, locacion }
   } catch (error) {
     throw new Error(`Error validando el token: ${error.message}`)
   }

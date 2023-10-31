@@ -9,15 +9,16 @@ import moment from 'moment'
 
 export async function facturarHandler(req, res) {
   try {
+    const { locacion, locacionData } = req
     const { orderId } = req.body
 
     if (!orderId) {
       return res.status(400).json({ message: 'No hay numero de orden' })
     }
 
-    const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft(req.body)
+    const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft(req.body, locacion, locacionData)
     console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
-    let resultadoFactura = await enviarFactura(jsonToGuruSoft)
+    let resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
 
     if (resultadoFactura.Estado === '15') {
       // Documento duplicado, se actualiza consecutivo y se intenta de nuevo
@@ -36,7 +37,7 @@ export async function facturarHandler(req, res) {
       // Se agrega a la tabla para que se ignore en le cierre de dia
       FacturasContribuyentes.create({
         order: orderId,
-        locacion: 'BolaDeOro',
+        locacion,
       })
 
       return res.json(resultadoFactura)
@@ -44,6 +45,7 @@ export async function facturarHandler(req, res) {
       return res.status(500).json(resultadoFactura)
     }
   } catch (e) {
+    console.log('🚀 ~ file: facturar.handlers.js:48 ~ facturarHandler ~ e:', e)
     const axiosResponse = {
       status: e.response.status,
       statusText: e.response.statusText,
@@ -72,7 +74,7 @@ export async function cierreDeDiaHandler(req, res) {
     let orderCount = 0
     let lastDate = ''
 
-    const cierreObj = await Cierres.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
+    const cierreObj = await Cierres.findOne({ where: { locacion: 'Bocas' } }) // TODO: Hacer dinamico a cada locacion
     const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
 
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate)
@@ -97,7 +99,7 @@ export async function cierreDeDiaHandler(req, res) {
 
       const orderId = getRowValue(order, 'order_id')
       console.log(`|-- EN PROCESO: ${orderId} --|`)
-      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'BolaDeOro' } })
+      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'Bocas' } })
       if (facturada) {
         console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
         continue
@@ -105,8 +107,9 @@ export async function cierreDeDiaHandler(req, res) {
 
       console.log('----- INICIA FACTURA ------')
       const total = getRowValue(order, 'total')
+      const orderStatus = getRowValue(order, 'ordder_status')
 
-      if (total === '0.00') {
+      if (total === '0.00' || orderStatus === 'voided') {
         ordenesEnCero.push(orderId)
         console.log('ORDEN EN CERO: ', orderId)
       } else {
@@ -171,8 +174,9 @@ export async function cierreDeDiaPostHandler(req, res) {
     let orderCount = 0
     let lastDate = ''
 
-    const cierreObj = await Cierres.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
-    const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
+    const cierreObj = await Cierres.findOne({ where: { locacion: 'Bocas' } }) // TODO: Hacer dinamico a cada locacion
+    // const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
+    const endDate = moment().format('YYYY-MM-DD HH:mm:ss')
 
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate)
     let totalOrders = []
@@ -197,7 +201,7 @@ export async function cierreDeDiaPostHandler(req, res) {
       console.log(`|-- EN PROCESO: ${orderId} --|`)
       console.log(`|-- ORDEN ${currentOrder} DE ${totalOrders.length} --|`)
       currentOrder++
-      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'BolaDeOro' } })
+      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'Bocas' } })
       if (facturada) {
         console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
         continue
@@ -205,8 +209,9 @@ export async function cierreDeDiaPostHandler(req, res) {
 
       console.log('----- INICIA FACTURA ------')
       const total = getRowValue(order, 'total')
+      const orderStatus = getRowValue(order, 'order_status')
 
-      if (total === '0.00') {
+      if (total === '0.00' || orderStatus === 'voided') {
         ordenesEnCero.push(orderId)
         console.log('ORDEN EN CERO: ', orderId)
       } else {
@@ -261,7 +266,7 @@ export async function cierreDeDiaPostHandler(req, res) {
 
 export async function fechaCierreDeDiaHandler(req, res) {
   try {
-    const cierreObj = await Cierres.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
+    const cierreObj = await Cierres.findOne({ where: { locacion: 'Bocas' } }) // TODO: Hacer dinamico a cada locacion
     res.json({
       fecha: moment(cierreObj.ultimo).format('DD-MM-YYYY'),
       hora: moment(cierreObj.ultimo).format('HH:mm:ss'),

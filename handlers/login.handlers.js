@@ -19,7 +19,7 @@ export async function loginHandler(req, res) {
       return res.status(401).json({ error: 'Credenciales inválidos' })
     }
 
-    const payload = { userId: usuario.id }
+    const payload = { userId: usuario.id, locacion: usuario.locacion }
     const expiresInOneYear = 60 * 60 * 24 * 365
 
     const token = jwt.sign(payload, secret, { expiresIn: expiresInOneYear })

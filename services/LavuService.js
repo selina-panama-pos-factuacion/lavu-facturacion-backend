@@ -13,12 +13,12 @@ class LavuService {
     }
   }
 
-  async getEndOfDayOrders(startDate, endDate) {
+  async getEndOfDayOrders(startDate, endDate, envPrefix) {
     const newStartDate = moment(startDate).add(1, 'seconds').format('YYYY-MM-DD HH:mm:ss')
     const params = {
-      dataname: process.env.LAVU_DATA,
-      key: process.env.LAVU_KEY,
-      token: process.env.LAVU_TOKEN,
+      dataname: process.env[`${envPrefix}LAVU_DATA`],
+      key: process.env[`${envPrefix}LAVU_KEY`],
+      token: process.env[`${envPrefix}LAVU_TOKEN`],
       table: process.env.LAVU_ORDERS_TABLE,
       column: 'closed',
       value_min: newStartDate,
@@ -29,11 +29,11 @@ class LavuService {
     return this.postRequest(params)
   }
 
-  getOrderContents(orderId) {
+  getOrderContents(orderId, envPrefix) {
     const params = {
-      dataname: process.env.LAVU_DATA,
-      key: process.env.LAVU_KEY,
-      token: process.env.LAVU_TOKEN,
+      dataname: process.env[`${envPrefix}LAVU_DATA`],
+      key: process.env[`${envPrefix}LAVU_KEY`],
+      token: process.env[`${envPrefix}LAVU_TOKEN`],
       table: process.env.LAVU_ORDER_CONTENTS_TABLE,
       column: 'order_id',
       value: orderId,
@@ -43,11 +43,11 @@ class LavuService {
 
     return this.postRequest(params)
   }
-  getOrderPayments(orderId) {
+  getOrderPayments(orderId, envPrefix) {
     const params = {
-      dataname: process.env.LAVU_DATA,
-      key: process.env.LAVU_KEY,
-      token: process.env.LAVU_TOKEN,
+      dataname: process.env[`${envPrefix}LAVU_DATA`],
+      key: process.env[`${envPrefix}LAVU_KEY`],
+      token: process.env[`${envPrefix}LAVU_TOKEN`],
       table: process.env.LAVU_ORDER_PAYMENTS_TABLE,
       column: 'order_id',
       value: orderId,
@@ -57,11 +57,11 @@ class LavuService {
     return this.postRequest(params)
   }
 
-  async getOrderGeneralInfo(orderId) {
+  async getOrderGeneralInfo(orderId, envPrefix) {
     const params = {
-      dataname: process.env.LAVU_DATA,
-      key: process.env.LAVU_KEY,
-      token: process.env.LAVU_TOKEN,
+      dataname: process.env[`${envPrefix}LAVU_DATA`],
+      key: process.env[`${envPrefix}LAVU_KEY`],
+      token: process.env[`${envPrefix}LAVU_TOKEN`],
       table: process.env.LAVU_ORDERS_TABLE,
       column: 'order_id',
       value: orderId,

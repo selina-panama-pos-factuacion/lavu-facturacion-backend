@@ -1,0 +1,47 @@
+export default {
+  TacosLaNeta: {
+    envPrefix: 'TLN_',
+    redisPrefix: 'bolaDeOro',
+    factura: {
+      dPtoFacDF: '009',
+      emisor: {
+        dTipoRuc: '2',
+        dRuc: '155631917-2-2016',
+        dDV: '42',
+        dCodUbi: '1-1-1',
+        dCorreg: 'BOCAS DEL TORO (CABECERA)',
+        dDistr: 'BOCAS DEL TORO',
+        dProv: 'BOCAS DEL TORO',
+        dNombEm: 'FE generada en ambiente de pruebas - sin valor comercial ni fiscal',
+        dSucEm: '0009',
+        dCoordEm: '+9.1263,-79.5855',
+        dDirecEm: 'CALLE PRIMERA, EDIFICIO TROPIKAL MARKET',
+        dTfnEm1: '321-0350',
+        dCorElectEmi1: 'facturacion.bocasdeltoro@selina.com',
+      },
+    },
+  },
+  Bocas: {
+    envPrefix: 'BOCAS_',
+    redisPrefix: 'bocas',
+    factura: {
+      dPtoFacDF: '009',
+      emisor: {
+        dTipoRuc: '2',
+        dRuc: '155631917-2-2016',
+        dDV: '42',
+        dCodUbi: '1-1-1',
+        dCorreg: 'BOCAS DEL TORO (CABECERA)',
+        dDistr: 'BOCAS DEL TORO',
+        dProv: 'BOCAS DEL TORO',
+        dNombEm: 'FE generada en ambiente de pruebas - sin valor comercial ni fiscal',
+        dSucEm: '0009',
+        dCoordEm: '+9.1263,-79.5855',
+        dDirecEm: 'CALLE PRIMERA, EDIFICIO TROPIKAL MARKET',
+        dTfnEm1: '321-0350',
+        dCorElectEmi1: 'facturacion.bocasdeltoro@selina.com',
+      },
+    },
+    mailer: '',
+  },
+}

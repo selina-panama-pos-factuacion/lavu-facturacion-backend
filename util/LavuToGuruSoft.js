@@ -3,8 +3,9 @@ import { getProductos, getRowValue } from './LavuOrderUtils.js'
 import getTemplate from './InvoiceTemplate.js'
 import LavuService from '../services/LavuService.js'
 
-export async function getJsonForGuruSoft(body) {
+export async function getJsonForGuruSoft(body, locacion, locacionData) {
   const jsonToGuruSoft = getTemplate()
+  const { envPrefix } = locacionData
   const {
     orderId,
     esContribuyente,
@@ -24,9 +25,9 @@ export async function getJsonForGuruSoft(body) {
 
   // ---- DATOS DE ORDER INFO ----
 
-  const consecutivoObj = await Consecutivos.findOne({ where: { locacion: 'BolaDeOro' } }) // TODO: Hacer dinamico a cada locacion
+  const consecutivoObj = await Consecutivos.findOne({ where: { locacion } })
   console.log('----DATOS DE ORDER INFO 1------')
-  const orderInfo = await LavuService.getOrderGeneralInfo(orderId)
+  const orderInfo = await LavuService.getOrderGeneralInfo(orderId, envPrefix)
   if (!orderInfo) return false
   console.log('----DATOS DE ORDER INFO 2------')
   let total = getRowValue(orderInfo.elements[0], 'total')
@@ -44,6 +45,12 @@ export async function getJsonForGuruSoft(body) {
     2
   )}-05:00`
   jsonToGuruSoft.dFechaEm = formattedDateTime
+
+  // --- EMISOR ---
+  jsonToGuruSoft.Emisor = locacionData.factura.emisor
+
+  // --- PTO DE VENTA ---
+  jsonToGuruSoft.dPtoFacDF = locacionData.factura.dPtoFacDF
 
   // ---- RECEPTOR ----
   console.log('---- RECEPTOR ----')
@@ -71,8 +78,8 @@ export async function getJsonForGuruSoft(body) {
 
   // ---- PRODUCTOS ----
   console.log('---- PRODUCTOS 1----')
-  const orderContents = await LavuService.getOrderContents(orderId)
-  if (!orderContents) return false
+  const orderContents = await LavuService.getOrderContents(orderId, envPrefix)
+  if (!orderContents || !orderContents.elements) return false
   console.log('---- PRODUCTOS 2----')
   const productos = getProductos(orderContents, exentoImpuesto)
   console.log('---- PRODUCTOS 3----')
@@ -82,8 +89,8 @@ export async function getJsonForGuruSoft(body) {
 
   // ---- FORMA DE PAGO ----
   console.log('---- FORMA DE PAGO 1----')
-  const orderPaymentInfo = await LavuService.getOrderPayments(orderId)
-  if (!orderPaymentInfo) return false
+  const orderPaymentInfo = await LavuService.getOrderPayments(orderId, envPrefix)
+  if (!orderPaymentInfo || !orderPaymentInfo.elements) return false
   console.log('---- FORMA DE PAGO 2----')
   const metodoPago = getRowValue(orderPaymentInfo.elements[0], 'pay_type')
   console.log('---- FORMA DE PAGO 3----')

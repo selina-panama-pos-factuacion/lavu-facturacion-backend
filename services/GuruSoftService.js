@@ -1,7 +1,6 @@
 import axios from 'axios'
 import { createClient } from 'redis'
 
-const REDIS_PREFIX = 'bolaDeOro' // TODO: mover a un obj cuando se implemente para todas las locaciones
 const BUFFER_DURATION = 5 * 60 * 1000
 const baseUrl = 'https://labpa.guru-soft.com/EdocPanama/4.0' // Pruebas
 const tokenUrl = `${baseUrl}/Autenticacion/Api/ServicioEDOC?Id=1`
@@ -24,9 +23,9 @@ redisClient
     console.log(error)
   })
 
-async function fetchBearerToken() {
-  const username = process.env.BASIC_TOKEN_USERNAME
-  const password = process.env.BASIC_TOKEN_PASSWORD
+async function fetchBearerToken(redisPrefix, envPrefix) {
+  const username = process.env[`${envPrefix}BASIC_TOKEN_USERNAME`]
+  const password = process.env[`${envPrefix}BASIC_TOKEN_PASSWORD`]
   const credentials = `${username}:${password}`
   const base64Credentials = Buffer.from(credentials).toString('base64')
 
@@ -38,48 +37,44 @@ async function fetchBearerToken() {
   const { token, expira } = response.data
 
   await redisClient.connect()
-  redisClient.set(redisKey('bearerToken'), token)
+  redisClient.set(`${redisPrefix}:bearerToken`, token)
   const originalExpiryDate = new Date(expira)
   const bufferedExpiryDate = new Date(originalExpiryDate.getTime() - BUFFER_DURATION)
-  redisClient.set(redisKey('expiryToken'), formatDateToCustomISO(bufferedExpiryDate))
+  redisClient.set(`${redisPrefix}:expiryToken`, formatDateToCustomISO(bufferedExpiryDate))
   await redisClient.quit()
 
   return token
 }
 
-async function getBearerToken() {
+async function getBearerToken(redisPrefix) {
   await redisClient.connect()
-  const bearerToken = await redisClient.get(redisKey('bearerToken'))
+  const bearerToken = await redisClient.get(`${redisPrefix}:bearerToken`)
   await redisClient.quit()
   return bearerToken
 }
-async function getExpiryToken() {
+async function getExpiryToken(redisPrefix) {
   await redisClient.connect()
-  const bearerToken = await redisClient.get(redisKey('expiryToken'))
+  const bearerToken = await redisClient.get(`${redisPrefix}:expiryToken`)
   await redisClient.quit()
   return bearerToken
 }
 
-async function checkTokenValidation() {
-  const expiryString = await getExpiryToken()
+async function checkTokenValidation({ redisPrefix, envPrefix }) {
+  const expiryString = await getExpiryToken(redisPrefix)
   const expiryDate = new Date(expiryString)
   const currentDate = new Date()
   let token = ''
 
   if (!expiryDate || currentDate > expiryDate) {
-    token = await fetchBearerToken()
+    token = await fetchBearerToken(redisPrefix, envPrefix)
   } else {
-    token = await getBearerToken()
+    token = await getBearerToken(redisPrefix)
   }
   return token
 }
 
-function redisKey(key) {
-  return `${REDIS_PREFIX}:${key}`
-}
-
-export async function enviarFactura(factura) {
-  const bearerToken = await checkTokenValidation()
+export async function enviarFactura(factura, locacionData) {
+  const bearerToken = await checkTokenValidation(locacionData)
   const headers = { Authorization: `Bearer ${bearerToken}` }
   const result = await axios.post(facutraUrl, factura, { headers })
 

@@ -11,7 +11,7 @@ export async function sendMail(data) {
 
   let info = await transporter.sendMail({
     from: '"Facturación Lavu" <selina.facturacion.panama@gmail.com>', // sender address
-    to: 'gbermudezmora@gmail.com, casco@tacoslaneta.com', // list of receivers casco@tacoslaneta.com
+    to: 'gbermudezmora@gmail.com', // list of receivers casco@tacoslaneta.com
     subject: 'Resultado Cierre de Día 🧾 ✅', // subject line
     html: isValidOrdenesResponse(data) ? jsonToHtml(data) : JSON.stringify(data), // plain text body
   })

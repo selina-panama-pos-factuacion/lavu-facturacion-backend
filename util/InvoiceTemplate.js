@@ -28,7 +28,7 @@ export default function getTemplate() {
       dCoordEm: '+9.1263,-79.5855',
       dDirecEm: 'CALLE PRIMERA, EDIFICIO TROPIKAL MARKET',
       dTfnEm1: '321-0350',
-      dCorElectEmi1: 'facturacion.boladeoro@selina.com',
+      dCorElectEmi1: 'facturacion.bocasdeltoro@selina.com',
     },
     Receptor: {
       iTipoRec: '02',
