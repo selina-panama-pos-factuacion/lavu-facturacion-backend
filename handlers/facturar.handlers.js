@@ -57,6 +57,8 @@ export async function facturarHandler(req, res) {
 }
 
 export async function cierreDeDiaHandler(req, res) {
+  const { locacion, locacionData } = req
+  const { envPrefix } = locacionData
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
   res.setHeader('Connection', 'keep-alive')
@@ -74,17 +76,17 @@ export async function cierreDeDiaHandler(req, res) {
     let orderCount = 0
     let lastDate = ''
 
-    const cierreObj = await Cierres.findOne({ where: { locacion: 'Bocas' } }) // TODO: Hacer dinamico a cada locacion
+    const cierreObj = await Cierres.findOne({ where: { locacion } })
     const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
 
-    let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate)
+    let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate, envPrefix)
     let totalOrders = []
 
     while (!!orders.elements && orders.elements.length > 1 && isConnectionOpen) {
       totalOrders.push(...orders.elements)
       orderCount += orders.elements.length
       lastDate = getRowValue(orders.elements[orders.elements.length - 1], 'closed')
-      orders = await LavuService.getEndOfDayOrders(lastDate, endDate)
+      orders = await LavuService.getEndOfDayOrders(lastDate, endDate, envPrefix)
     }
 
     const ordenesExito = []
@@ -99,7 +101,7 @@ export async function cierreDeDiaHandler(req, res) {
 
       const orderId = getRowValue(order, 'order_id')
       console.log(`|-- EN PROCESO: ${orderId} --|`)
-      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'Bocas' } })
+      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion } })
       if (facturada) {
         console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
         continue
@@ -114,9 +116,9 @@ export async function cierreDeDiaHandler(req, res) {
         console.log('ORDEN EN CERO: ', orderId)
       } else {
         try {
-          const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true })
+          const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true }, locacion, locacionData)
           console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
-          const resultadoFactura = await enviarFactura(jsonToGuruSoft)
+          const resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
           console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
           if (resultadoFactura && resultadoFactura.Estado === '2') {
@@ -170,22 +172,25 @@ export async function cierreDeDiaHandler(req, res) {
 }
 
 export async function cierreDeDiaPostHandler(req, res) {
+  const { locacion, locacionData } = req
+  const { envPrefix } = locacionData
+
   try {
     let orderCount = 0
     let lastDate = ''
 
-    const cierreObj = await Cierres.findOne({ where: { locacion: 'Bocas' } }) // TODO: Hacer dinamico a cada locacion
+    const cierreObj = await Cierres.findOne({ where: { locacion } })
     // const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
     const endDate = moment().format('YYYY-MM-DD HH:mm:ss')
 
-    let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate)
+    let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate, envPrefix)
     let totalOrders = []
 
     while (!!orders.elements && orders.elements.length > 1) {
       totalOrders.push(...orders.elements)
       orderCount += orders.elements.length
       lastDate = getRowValue(orders.elements[orders.elements.length - 1], 'closed')
-      orders = await LavuService.getEndOfDayOrders(lastDate, endDate)
+      orders = await LavuService.getEndOfDayOrders(lastDate, endDate, envPrefix)
     }
 
     const ordenesExito = []
@@ -201,7 +206,7 @@ export async function cierreDeDiaPostHandler(req, res) {
       console.log(`|-- EN PROCESO: ${orderId} --|`)
       console.log(`|-- ORDEN ${currentOrder} DE ${totalOrders.length} --|`)
       currentOrder++
-      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion: 'Bocas' } })
+      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion } })
       if (facturada) {
         console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
         continue
@@ -216,9 +221,9 @@ export async function cierreDeDiaPostHandler(req, res) {
         console.log('ORDEN EN CERO: ', orderId)
       } else {
         try {
-          const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true })
+          const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true }, locacion, locacionData)
           console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
-          const resultadoFactura = await enviarFactura(jsonToGuruSoft)
+          const resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
           console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
           if (resultadoFactura && resultadoFactura.Estado === '2') {
@@ -251,22 +256,25 @@ export async function cierreDeDiaPostHandler(req, res) {
     console.log('----- FINALIZA PROCESO ------')
 
     // Enviar Email
-    sendMail({
-      ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
-      ordenesError: { ordenes: ordenesError, count: ordenesError.length },
-    })
+    sendMail(
+      {
+        ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
+        ordenesError: { ordenes: ordenesError, count: ordenesError.length },
+      },
+      locacionData.mailReceivers
+    )
   } catch (error) {
     const errorData = {
       message: 'Internal Server Error',
       error: error.message,
     }
-    sendMail(errorData)
+    sendMail(errorData, locacionData.mailReceivers)
   }
 }
 
 export async function fechaCierreDeDiaHandler(req, res) {
   try {
-    const cierreObj = await Cierres.findOne({ where: { locacion: 'Bocas' } }) // TODO: Hacer dinamico a cada locacion
+    const cierreObj = await Cierres.findOne({ where: { locacion: req.locacion } })
     res.json({
       fecha: moment(cierreObj.ultimo).format('DD-MM-YYYY'),
       hora: moment(cierreObj.ultimo).format('HH:mm:ss'),

@@ -49,9 +49,6 @@ export async function getJsonForGuruSoft(body, locacion, locacionData) {
   // --- EMISOR ---
   jsonToGuruSoft.Emisor = locacionData.factura.emisor
 
-  // --- PTO DE VENTA ---
-  jsonToGuruSoft.dPtoFacDF = locacionData.factura.dPtoFacDF
-
   // ---- RECEPTOR ----
   console.log('---- RECEPTOR ----')
 

@@ -3,7 +3,7 @@ export default function getTemplate() {
     dNroDF: '0000000001', // Consecutivo de la factura, 10 digitos
     iTpEmis: '01',
     iDoc: '01', // Factura de operacion interna
-    dPtoFacDF: '005', // ID del punto de venta. Pedir a Yericel.
+    dPtoFacDF: '001', // ID del punto de venta.
     dFechaEm: '', // DATETIME con la fecha de emisión
     iNatOp: '01',
     iTipoOp: '1',
