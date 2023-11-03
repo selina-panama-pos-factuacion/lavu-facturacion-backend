@@ -261,6 +261,7 @@ export async function cierreDeDiaPostHandler(req, res) {
         ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
         ordenesError: { ordenes: ordenesError, count: ordenesError.length },
       },
+      locacion,
       locacionData.mailReceivers
     )
   } catch (error) {
