@@ -74,6 +74,21 @@ const datosEmisores = {
     dTfnEm1: '202-7968',
     dCorElectEmi1: 'facturacion.playavenao@selina.com',
   },
+  venaoTipi: {
+    dTipoRuc: '2',
+    dRuc: '155712645-2-2021',
+    dDV: '57',
+    dCodUbi: '7-5-5',
+    dCorreg: 'ORIA ARRIBA',
+    dDistr: 'PEDASI',
+    dProv: 'LOS SANTOS',
+    dNombEm: 'FE generada en ambiente de pruebas - sin valor comercial ni fiscal',
+    dSucEm: '0009',
+    dCoordEm: '+9.1263,-79.5855',
+    dDirecEm: 'Calle venao, Edificio Selina Tipi.',
+    dTfnEm1: '659-4874',
+    dCorElectEmi1: 'facturacion.venaotipi@selina.com',
+  },
 }
 
 export default {
@@ -123,6 +138,14 @@ export default {
     mailReceivers: [''],
     factura: {
       emisor: datosEmisores.venao,
+    },
+  },
+  VenaoTipi: {
+    envPrefix: 'VENAOTIPI_',
+    redisPrefix: 'venaotipi',
+    mailReceivers: [''],
+    factura: {
+      emisor: datosEmisores.venaoTipi,
     },
   },
 }
