@@ -223,7 +223,7 @@ export async function cierreDeDiaPostHandler(req, res) {
         try {
           const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true }, locacion, locacionData)
           console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
-          const resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
+          let resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
           console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
           if (resultadoFactura && resultadoFactura.Estado !== '2') {
@@ -236,6 +236,7 @@ export async function cierreDeDiaPostHandler(req, res) {
             }
             console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
             resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
+            console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
           }
 
           if (resultadoFactura && resultadoFactura.Estado === '2') {
