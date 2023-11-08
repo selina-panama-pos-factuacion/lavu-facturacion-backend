@@ -226,7 +226,7 @@ export async function cierreDeDiaPostHandler(req, res) {
           const resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
           console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
-          if (resultado && resultadoFactura.Estado !== '12') {
+          if (resultadoFactura && resultadoFactura.Estado !== '12') {
             // Si fallo la factura
             if (resultadoFactura.Estado === '15') {
               // Documento duplicado, se actualiza consecutivo y se intenta de nuevo
