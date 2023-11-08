@@ -24,7 +24,7 @@ export async function facturarHandler(req, res) {
       // Documento duplicado, se actualiza consecutivo y se intenta de nuevo
       const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
       await consecutivoObj.update({ consecutivo: newConsecutivo })
-      jsonToGuruSoft.dNroDF = padNumberWithZeros(consecutivoObj.consecutivo, 10)
+      jsonToGuruSoft.dNroDF = padNumberWithZeros(newConsecutivo.toString(), 10)
       console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
       resultadoFactura = await enviarFactura(jsonToGuruSoft)
     }
@@ -232,7 +232,7 @@ export async function cierreDeDiaPostHandler(req, res) {
               // Documento duplicado, se actualiza consecutivo y se intenta de nuevo
               const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
               await consecutivoObj.update({ consecutivo: newConsecutivo })
-              jsonToGuruSoft.dNroDF = padNumberWithZeros(consecutivoObj.consecutivo, 10)
+              jsonToGuruSoft.dNroDF = padNumberWithZeros(newConsecutivo.toString(), 10)
             }
             console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
             resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
