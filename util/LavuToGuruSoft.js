@@ -59,6 +59,7 @@ export async function getJsonForGuruSoft(body, locacion, locacionData) {
       //  Extranjero
       jsonToGuruSoft.Receptor.dPaisExt = paisSeleccionado.nombre
       jsonToGuruSoft.Receptor.dIdExt = numeroDocumento
+      jsonToGuruSoft.Receptor.dCorElectRec1 = emailCliente
     } else {
       jsonToGuruSoft.Receptor.dTipoRuc = `0${tipoRuc}`
       jsonToGuruSoft.Receptor.dDV = digitoVerificador
