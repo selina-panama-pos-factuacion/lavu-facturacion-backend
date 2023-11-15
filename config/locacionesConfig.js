@@ -14,6 +14,21 @@ const datosEmisores = {
     dTfnEm1: '202-9883',
     dCorElectEmi1: 'facturacion.boladeoro@selina.com',
   },
+  laNeta: {
+    dTipoRuc: '2',
+    dRuc: '155664844-2-2018',
+    dDV: '64',
+    dCodUbi: '8-8-1',
+    dCorreg: 'SAN FELIPE',
+    dDistr: 'PANAMA',
+    dProv: 'PANAMA',
+    dNombEm: 'FE generada en ambiente de pruebas - sin valor comercial ni fiscal',
+    dSucEm: '0005',
+    dCoordEm: '+9.1263,-79.5855',
+    dDirecEm: 'AV B con calle 12, Edificio Bola de Oro',
+    dTfnEm1: '202-9883',
+    dCorElectEmi1: 'facturacion.boladeoro@selina.com',
+  },
   bocas: {
     dTipoRuc: '2',
     dRuc: '155631917-2-2016',
@@ -97,7 +112,7 @@ export default {
     redisPrefix: 'bolaDeOro',
     mailReceivers: ['caso@tacoslaneta.com'],
     factura: {
-      emisor: datosEmisores.casco,
+      emisor: datosEmisores.laNeta,
     },
   },
   Casco: {
