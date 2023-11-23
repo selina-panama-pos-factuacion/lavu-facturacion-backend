@@ -194,6 +194,7 @@ export async function cierreDeDiaPostHandler(req, res) {
     }
 
     const ordenesExito = []
+    const ordenesPorConfirmar = []
     const ordenesError = []
     const ordenesEnCero = []
 
@@ -226,7 +227,7 @@ export async function cierreDeDiaPostHandler(req, res) {
           let resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
           console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
-          if (resultadoFactura && resultadoFactura.Estado !== '2') {
+          if (resultadoFactura && resultadoFactura.Estado !== '2' && resultadoFactura.Estado !== '20') {
             // Si fallo la factura
             if (resultadoFactura.Estado === '15') {
               // Documento duplicado, se actualiza consecutivo y se intenta de nuevo
@@ -243,6 +244,10 @@ export async function cierreDeDiaPostHandler(req, res) {
             // Si se emitió exitosamente la factura
             ordenesExito.push(orderId)
             console.log('FACTURA CON EXITO: ', orderId)
+          } else if (resultadoFactura && resultadoFactura.Estado === '20') {
+            // Factura por confirmar
+            ordenesPorConfirmar.push(orderId)
+            console.log('FACTURA POR CONFIRMAR: ', orderId)
           } else {
             console.log('---FACTURA CON ERROR: ', orderId)
             ordenesError.push(orderId)
@@ -262,6 +267,7 @@ export async function cierreDeDiaPostHandler(req, res) {
       await cierreObj.update({ ultimo: orderClosed })
 
       console.log('ORDENES EXITO: ', ordenesExito.length)
+      console.log('ORDENES POR CONFIRMAR: ', ordenesPorConfirmar.length)
       console.log('ORDENES EN CERO: ', ordenesEnCero.length)
       console.log('ORDENES ERROR: ', ordenesError.length)
     }
@@ -272,6 +278,7 @@ export async function cierreDeDiaPostHandler(req, res) {
     sendMail(
       {
         ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
+        ordenesPorConfirmar: { ordenes: ordenesPorConfirmar, count: ordenesExito.ordenesPorConfirmar },
         ordenesError: { ordenes: ordenesError, count: ordenesError.length },
       },
       locacion,

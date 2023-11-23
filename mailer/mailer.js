@@ -34,6 +34,18 @@ function jsonToHtml(data) {
     html += '<p>No hay órdenes de éxito.</p>'
   }
 
+  // For ordenesPorConfirmar
+  html += '<h4>ÓRDENES FACTURADAS CON ÉXITO (' + data.ordenesExito.count + ') 🧐</h4>'
+  if (data.ordenesPorConfirmar.count > 0) {
+    html += '<ul>'
+    data.ordenesPorConfirmar.ordenes.forEach(order => {
+      html += '<li>' + order + '</li>'
+    })
+    html += '</ul>'
+  } else {
+    html += '<p>No hay órdenes por confirmar.</p>'
+  }
+
   // For ordenesError
   html += '<h4>ÓRDENES CON ERROR (' + data.ordenesError.count + ') ❌</h4>'
   if (data.ordenesError.count > 0) {
