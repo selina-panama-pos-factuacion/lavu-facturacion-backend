@@ -2,7 +2,7 @@ import axios from 'axios'
 import redisClient from '../config/redisClient.js'
 
 const BUFFER_DURATION = 5 * 60 * 1000
-const baseUrl = 'https://labpa.guru-soft.com/EdocPanama/4.0' // Pruebas
+const baseUrl = 'https://pa.edocnube.com/4.0' // PROD
 const tokenUrl = `${baseUrl}/Autenticacion/Api/ServicioEDOC?Id=1`
 const facutraUrl = `${baseUrl}/Emision/Api/Factura`
 

@@ -110,7 +110,7 @@ export default {
   TacosLaNeta: {
     envPrefix: 'TLN_',
     redisPrefix: 'bolaDeOro',
-    mailReceivers: ['caso@tacoslaneta.com'],
+    mailReceivers: ['karen@tacoslaneta.com', 'jose.martinez@selina.com', 'dianye@selina.com', 'lineth.pimentel@selina.com'],
     factura: {
       emisor: datosEmisores.laNeta,
     },
@@ -118,7 +118,7 @@ export default {
   Casco: {
     envPrefix: 'CASCO_',
     redisPrefix: 'casco',
-    mailReceivers: [''],
+    mailReceivers: ['karen@tacoslaneta.com', 'jose.martinez@selina.com', 'dianye@selina.com', 'lineth.pimentel@selina.com'],
     factura: {
       emisor: datosEmisores.casco,
     },
@@ -126,7 +126,7 @@ export default {
   Bocas: {
     envPrefix: 'BOCAS_',
     redisPrefix: 'bocas',
-    mailReceivers: [''],
+    mailReceivers: ['contabilidadbocas@tacoslaneta.com', 'jose.martinez@selina.com', 'claribel.castillo@selina.com'],
     factura: {
       emisor: datosEmisores.bocas,
     },
@@ -134,7 +134,7 @@ export default {
   Boquete: {
     envPrefix: 'BOQUETE_',
     redisPrefix: 'boquete',
-    mailReceivers: [''],
+    mailReceivers: ['cindy@tacoslaneta.com', 'jose.martinez@selina.com', 'dianye@selina.com', 'liliana.quiel@selina.com'],
     factura: {
       emisor: datosEmisores.boquete,
     },
@@ -142,7 +142,7 @@ export default {
   RedFrog: {
     envPrefix: 'REDFROG_',
     redisPrefix: 'redfrog',
-    mailReceivers: [''],
+    mailReceivers: ['claribel.castillo@selina.com', 'vera.akhmetshin@selina.com'],
     factura: {
       emisor: datosEmisores.redFrog,
     },
@@ -150,7 +150,7 @@ export default {
   Venao: {
     envPrefix: 'VENAO_',
     redisPrefix: 'venao',
-    mailReceivers: [''],
+    mailReceivers: ['contabilidadlapalma@tacoslaneta.com', 'jose.martinez@selina.com', 'aurys.cuentas@selina.com'],
     factura: {
       emisor: datosEmisores.venao,
     },
@@ -158,7 +158,7 @@ export default {
   VenaoTipi: {
     envPrefix: 'VENAOTIPI_',
     redisPrefix: 'venaotipi',
-    mailReceivers: [''],
+    mailReceivers: ['contabilidadlapalma@tacoslaneta.com', 'jose.martinez@selina.com', 'aurys.cuentas@selina.com'],
     factura: {
       emisor: datosEmisores.venaoTipi,
     },
