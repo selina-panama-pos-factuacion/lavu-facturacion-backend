@@ -29,7 +29,7 @@ export async function facturarHandler(req, res) {
       resultadoFactura = await enviarFactura(jsonToGuruSoft)
     }
 
-    if (resultadoFactura.Estado === '2') {
+    if (resultadoFactura.Estado === '2' || resultadoFactura.Estado === '20') {
       // Se emitió exitosamente la factura
       const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
       await consecutivoObj.update({ consecutivo: newConsecutivo })
