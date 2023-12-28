@@ -35,7 +35,7 @@ function jsonToHtml(data) {
   }
 
   // For ordenesPorConfirmar
-  html += '<h4>ÓRDENES FACTURADAS CON ÉXITO (' + data.ordenesExito.count + ') 🧐</h4>'
+  html += '<h4>ÓRDENES POR CONFIRMAR (' + data.ordenesExito.count + ') 🧐</h4>'
   if (data.ordenesPorConfirmar.count > 0) {
     html += '<ul>'
     data.ordenesPorConfirmar.ordenes.forEach(order => {
