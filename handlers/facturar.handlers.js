@@ -171,128 +171,6 @@ export async function cierreDeDiaHandler(req, res) {
   }
 }
 
-export async function cierreDeDiaPostHandler1(req, res) {
-  const { locacion, locacionData } = req
-  const { envPrefix } = locacionData
-
-  try {
-    let orderCount = 0
-    let lastDate = ''
-
-    const cierreObj = await Cierres.findOne({ where: { locacion } })
-    // const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
-    const endDate = moment().format('YYYY-MM-DD HH:mm:ss')
-
-    let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate, envPrefix)
-    let totalOrders = []
-
-    while (!!orders.elements && orders.elements.length > 1) {
-      totalOrders.push(...orders.elements)
-      orderCount += orders.elements.length
-      lastDate = getRowValue(orders.elements[orders.elements.length - 1], 'closed')
-      orders = await LavuService.getEndOfDayOrders(lastDate, endDate, envPrefix)
-    }
-
-    const ordenesExito = []
-    const ordenesPorConfirmar = []
-    const ordenesError = []
-    const ordenesEnCero = []
-
-    let currentOrder = 1
-    res.json({ result: 'Cierre de día iniciado exitosamente!' })
-
-    for (const order of totalOrders) {
-      console.log('------ INICIA PROCESO -------')
-      const orderId = getRowValue(order, 'order_id')
-      console.log(`|-- EN PROCESO: ${orderId} --|`)
-      console.log(`|-- ORDEN ${currentOrder} DE ${totalOrders.length} --|`)
-      currentOrder++
-      const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion } })
-      if (facturada) {
-        console.log('---- YA FUE FACTURADA COMO CONTRIBUYENTE ----')
-        continue
-      }
-
-      console.log('----- INICIA FACTURA ------')
-      const total = getRowValue(order, 'total')
-      const orderStatus = getRowValue(order, 'order_status')
-
-      if (total === '0.00' || orderStatus === 'voided') {
-        ordenesEnCero.push(orderId)
-        console.log('ORDEN EN CERO: ', orderId)
-      } else {
-        try {
-          const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true }, locacion, locacionData)
-          console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
-          let resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
-          console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
-
-          if (resultadoFactura && resultadoFactura.Estado !== '2' && resultadoFactura.Estado !== '20') {
-            // Si fallo la factura
-            if (resultadoFactura.Estado === '15') {
-              // Documento duplicado, se actualiza consecutivo y se intenta de nuevo
-              const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
-              await consecutivoObj.update({ consecutivo: newConsecutivo })
-              jsonToGuruSoft.dNroDF = padNumberWithZeros(newConsecutivo.toString(), 10)
-            }
-            console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
-            resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
-            console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
-          }
-
-          if (resultadoFactura && resultadoFactura.Estado === '2') {
-            // Si se emitió exitosamente la factura
-            ordenesExito.push(orderId)
-            console.log('FACTURA CON EXITO: ', orderId)
-          } else if (resultadoFactura && resultadoFactura.Estado === '20') {
-            // Factura por confirmar
-            ordenesPorConfirmar.push(orderId)
-            console.log('FACTURA POR CONFIRMAR: ', orderId)
-          } else {
-            console.log('---FACTURA CON ERROR: ', orderId)
-            ordenesError.push(orderId)
-          }
-          const newConsecutivo = Number(consecutivoObj.consecutivo) + 1
-          await consecutivoObj.update({ consecutivo: newConsecutivo })
-        } catch (error) {
-          console.log('--ERROR--', error.message)
-          console.log('---FACTURA CON ERROR: ', orderId)
-          ordenesError.push(orderId)
-        }
-
-        console.log('----- FINALIZA FACTURA ------')
-      }
-
-      const orderClosed = getRowValue(order, 'closed')
-      await cierreObj.update({ ultimo: orderClosed })
-
-      console.log('ORDENES EXITO: ', ordenesExito.length)
-      console.log('ORDENES POR CONFIRMAR: ', ordenesPorConfirmar.length)
-      console.log('ORDENES EN CERO: ', ordenesEnCero.length)
-      console.log('ORDENES ERROR: ', ordenesError.length)
-    }
-
-    console.log('----- FINALIZA PROCESO ------')
-
-    // Enviar Email
-    sendMail(
-      {
-        ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
-        ordenesPorConfirmar: { ordenes: ordenesPorConfirmar, count: ordenesExito.ordenesPorConfirmar },
-        ordenesError: { ordenes: ordenesError, count: ordenesError.length },
-      },
-      locacion,
-      locacionData.mailReceivers
-    )
-  } catch (error) {
-    const errorData = {
-      message: 'Internal Server Error',
-      error: error.message,
-    }
-    sendMail(errorData, locacionData.mailReceivers)
-  }
-}
-
 export async function cierreDeDiaPostHandler(req, res) {
   const { locacion, locacionData } = req
   console.log('🚀 ~ file: facturar.handlers.js:298 ~ cierreDeDiaPostHandler ~ locacionData:', locacionData)
@@ -303,8 +181,7 @@ export async function cierreDeDiaPostHandler(req, res) {
     let lastDate = ''
 
     const cierreObj = await Cierres.findOne({ where: { locacion } })
-    // const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
-    const endDate = moment().format('YYYY-MM-DD HH:mm:ss')
+    const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
 
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate, envPrefix)
 
