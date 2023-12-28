@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 
 export async function sendMail(data, locacion, receivers) {
+  console.log('🚀 ~ file: mailer.js:4 ~ sendMail ~ receivers:', receivers)
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {

@@ -19,7 +19,9 @@ export function validateBearerToken(req, res, next) {
 
     req.userId = userId
     req.locacion = locacion
+    console.log('🚀 ~ file: auth.middleware.js:22 ~ validateBearerToken ~ locacion:', locacion)
     req.locacionData = locacionesConfig[locacion]
+    console.log('🚀 ~ file: auth.middleware.js:24 ~ validateBearerToken ~ locacionData:', req.locacionData)
     next()
   } catch (error) {
     return res.status(401).json({ error })
