@@ -295,6 +295,7 @@ export async function cierreDeDiaPostHandler1(req, res) {
 
 export async function cierreDeDiaPostHandler(req, res) {
   const { locacion, locacionData } = req
+  console.log('🚀 ~ file: facturar.handlers.js:298 ~ cierreDeDiaPostHandler ~ locacionData:', locacionData)
   const { envPrefix } = locacionData
 
   try {
