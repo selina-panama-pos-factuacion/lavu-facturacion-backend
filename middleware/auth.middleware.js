@@ -1,5 +1,5 @@
 import { secret } from '../handlers/login.handlers.js'
-import locacionesConfig from '../config/locacionesConfig.js'
+import { locacionesConfig } from '../config/locacionesConfig.js'
 import jwt from 'jsonwebtoken'
 
 export function validateBearerToken(req, res, next) {

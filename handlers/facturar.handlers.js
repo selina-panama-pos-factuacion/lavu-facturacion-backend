@@ -10,6 +10,8 @@ import moment from 'moment'
 export async function facturarHandler(req, res) {
   try {
     const { locacion, locacionData } = req
+    console.log('🚀 ~ file: facturar.handlers.js:13 ~ facturarHandler ~ locacion:', locacion)
+    console.log('🚀 ~ file: facturar.handlers.js:13 ~ facturarHandler ~ locacionData:', locacionData)
     const { orderId } = req.body
 
     if (!orderId) {

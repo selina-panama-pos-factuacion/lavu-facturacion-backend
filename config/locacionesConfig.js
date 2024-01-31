@@ -106,7 +106,7 @@ const datosEmisores = {
   },
 }
 
-export default {
+export const locacionesConfig = {
   TacosLaNeta: {
     envPrefix: 'TLN_',
     redisPrefix: 'bolaDeOro',
