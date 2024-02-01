@@ -6,6 +6,12 @@ import LavuService from '../services/LavuService.js'
 import Cierres from '../models/cierres.js'
 import FacturasContribuyentes from '../models/facturas_contribuyentes.js'
 import moment from 'moment'
+import fs from 'fs'
+
+const logStream = fs.createWriteStream('log.txt', { flags: 'a' })
+const log = message => {
+  logStream.write(message + '\n')
+}
 
 export async function facturarHandler(req, res) {
   try {
@@ -184,22 +190,23 @@ export async function cierreDeDiaPostHandler(req, res) {
 
     const cierreObj = await Cierres.findOne({ where: { locacion } })
     const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
+    // const endDate = moment(cierreObj.ultimo).add(1, 'days').format('YYYY-MM-DD HH:mm:ss')
+    console.log('🚀 ~ file: facturar.handlers.js:184 ~ cierreDeDiaPostHandler ~ endDate:', endDate)
 
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate, envPrefix)
+    res.json({ result: 'Cierre de día iniciado exitosamente!' })
+
+    const ordenesExito = []
+    const ordenesPorConfirmar = []
+    const ordenesError = []
+    const ordenesEnCero = []
 
     while (!!orders.elements && orders.elements.length > 1) {
       orderCount += orders.elements.length
-      lastDate = getRowValue(orders.elements[orders.elements.length - 1], 'closed')
 
-      const ordenesExito = []
-      const ordenesPorConfirmar = []
-      const ordenesError = []
-      const ordenesEnCero = []
-
-      res.json({ result: 'Cierre de día iniciado exitosamente!' })
-
-      for (const order of orders) {
+      for (const order of orders.elements) {
         console.log('------ INICIA PROCESO -------')
+
         const orderId = getRowValue(order, 'order_id')
         console.log(`|-- EN PROCESO: ${orderId} --|`)
         const facturada = await FacturasContribuyentes.findOne({ where: { order: orderId, locacion } })
@@ -265,9 +272,17 @@ export async function cierreDeDiaPostHandler(req, res) {
         console.log('ORDENES POR CONFIRMAR: ', ordenesPorConfirmar.length)
         console.log('ORDENES EN CERO: ', ordenesEnCero.length)
         console.log('ORDENES ERROR: ', ordenesError.length)
-      }
 
+        const tmpLastDate = getRowValue(order, 'closed')
+        // log(`ORDER: ${orderId} --- CLOSED: ${tmpLastDate}`)
+
+        if (!lastDate || moment(tmpLastDate).isAfter(moment(lastDate))) {
+          lastDate = tmpLastDate
+        }
+      }
       orders = await LavuService.getEndOfDayOrders(lastDate, endDate, envPrefix)
+      // log(`Last Date: ${lastDate}`)
+      // log(`End Date: ${endDate}`)
     }
 
     console.log('----- FINALIZA PROCESO ------')
@@ -276,7 +291,7 @@ export async function cierreDeDiaPostHandler(req, res) {
     sendMail(
       {
         ordenesExito: { ordenes: ordenesExito, count: ordenesExito.length },
-        ordenesPorConfirmar: { ordenes: ordenesPorConfirmar, count: ordenesExito.ordenesPorConfirmar },
+        ordenesPorConfirmar: { ordenes: ordenesPorConfirmar, count: ordenesPorConfirmar.length },
         ordenesError: { ordenes: ordenesError, count: ordenesError.length },
       },
       locacion,
@@ -287,7 +302,8 @@ export async function cierreDeDiaPostHandler(req, res) {
       message: 'Internal Server Error',
       error: error.message,
     }
-    sendMail(errorData, locacionData.mailReceivers)
+    console.log('🚀 ~ file: facturar.handlers.js:287 ~ cierreDeDiaPostHandler ~ errorData:', errorData)
+    sendMail(errorData, locacion)
   }
 }
 

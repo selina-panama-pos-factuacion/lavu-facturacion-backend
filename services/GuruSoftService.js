@@ -1,5 +1,6 @@
 import axios from 'axios'
 import redisClient from '../config/redisClient.js'
+import moment from 'moment'
 
 const BUFFER_DURATION = 5 * 60 * 1000
 const baseUrl = 'https://pa.edocnube.com/4.0' // PROD
@@ -38,11 +39,11 @@ async function getExpiryToken(redisPrefix) {
 
 async function checkTokenValidation({ redisPrefix, envPrefix }) {
   const expiryString = await getExpiryToken(redisPrefix)
-  const expiryDate = new Date(expiryString)
-  const currentDate = new Date()
+  const expiryDate = moment(expiryString)
+  const currentDate = moment()
   let token = ''
 
-  if (!expiryDate || currentDate > expiryDate) {
+  if (!expiryDate || currentDate.isAfter(expiryDate)) {
     token = await fetchBearerToken(redisPrefix, envPrefix)
   } else {
     token = await getBearerToken(redisPrefix)
