@@ -51,6 +51,7 @@ export async function getJsonForGuruSoft(body, locacion, locacionData) {
 
   // ---- RECEPTOR ----
   console.log('---- RECEPTOR ----')
+  jsonToGuruSoft.Receptor.dCorElectRec1 = emailCliente || ''
 
   if (esContribuyente) {
     // Llenar datos de receptor
@@ -59,7 +60,6 @@ export async function getJsonForGuruSoft(body, locacion, locacionData) {
       //  Extranjero
       jsonToGuruSoft.Receptor.dPaisExt = paisSeleccionado.nombre
       jsonToGuruSoft.Receptor.dIdExt = numeroDocumento
-      jsonToGuruSoft.Receptor.dCorElectRec1 = emailCliente
     } else {
       jsonToGuruSoft.Receptor.dTipoRuc = `0${tipoRuc}`
       jsonToGuruSoft.Receptor.dDV = digitoVerificador
@@ -70,7 +70,6 @@ export async function getJsonForGuruSoft(body, locacion, locacionData) {
       jsonToGuruSoft.Receptor.dCorreg = labelUbicacion.split('-')[2].trim()
       jsonToGuruSoft.Receptor.dNombRec = nombreRazonSocial
       jsonToGuruSoft.Receptor.dDirecRec = direccionCliente
-      jsonToGuruSoft.Receptor.dCorElectRec1 = emailCliente
     }
   }
 
