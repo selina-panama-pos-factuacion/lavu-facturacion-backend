@@ -65,9 +65,13 @@ export async function getJsonForGuruSoft(body, locacion, locacionData) {
       jsonToGuruSoft.Receptor.dDV = digitoVerificador
       jsonToGuruSoft.Receptor.dRuc = numeroDocumento
       jsonToGuruSoft.Receptor.dCodUbi = `${codigoProvincia}-${codigoDistrito}-${codigoCorregimiento}`
-      jsonToGuruSoft.Receptor.dProv = labelUbicacion.split('-')[0].trim()
-      jsonToGuruSoft.Receptor.dDistr = labelUbicacion.split('-')[1].trim()
-      jsonToGuruSoft.Receptor.dCorreg = labelUbicacion.split('-')[2].trim()
+      jsonToGuruSoft.Receptor.dProv = labelUbicacion.split('-')[0] || 'PANAMA'
+      jsonToGuruSoft.Receptor.dDistr = labelUbicacion.split('-')[1] || 'PANAMA'
+      jsonToGuruSoft.Receptor.dCorreg = labelUbicacion.split('-')[2] || 'SAN FELIPE'
+      jsonToGuruSoft.Receptor.dProv.trim()
+      jsonToGuruSoft.Receptor.dDistr.trim()
+      jsonToGuruSoft.Receptor.dCorreg.trim()
+      if (jsonToGuruSoft.Receptor.dCodUbi === '--') jsonToGuruSoft.Receptor.dCodUbi = '8-8-1'
       jsonToGuruSoft.Receptor.dNombRec = nombreRazonSocial
       jsonToGuruSoft.Receptor.dDirecRec = direccionCliente
     }
