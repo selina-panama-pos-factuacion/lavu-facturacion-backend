@@ -35,7 +35,7 @@ export async function facturarHandler(req, res) {
       await consecutivoObj.update({ consecutivo: newConsecutivo })
       jsonToGuruSoft.dNroDF = padNumberWithZeros(newConsecutivo.toString(), 10)
       console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
-      resultadoFactura = await enviarFactura(jsonToGuruSoft)
+      resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
       console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
     }
 
