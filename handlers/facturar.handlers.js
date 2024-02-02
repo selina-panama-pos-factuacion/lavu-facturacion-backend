@@ -27,6 +27,7 @@ export async function facturarHandler(req, res) {
     const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft(req.body, locacion, locacionData)
     console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
     let resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
+    console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
     if (resultadoFactura.Estado === '15') {
       // Documento duplicado, se actualiza consecutivo y se intenta de nuevo
@@ -35,6 +36,7 @@ export async function facturarHandler(req, res) {
       jsonToGuruSoft.dNroDF = padNumberWithZeros(newConsecutivo.toString(), 10)
       console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
       resultadoFactura = await enviarFactura(jsonToGuruSoft)
+      console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
     }
 
     if (resultadoFactura.Estado === '2' || resultadoFactura.Estado === '20') {
@@ -189,8 +191,8 @@ export async function cierreDeDiaPostHandler(req, res) {
     let lastDate = ''
 
     const cierreObj = await Cierres.findOne({ where: { locacion } })
-    const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
-    // const endDate = moment(cierreObj.ultimo).add(1, 'days').format('YYYY-MM-DD HH:mm:ss')
+    // const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
+    const endDate = moment(cierreObj.ultimo).add(1, 'days').format('YYYY-MM-DD HH:mm:ss')
     console.log('🚀 ~ file: facturar.handlers.js:184 ~ cierreDeDiaPostHandler ~ endDate:', endDate)
 
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate, envPrefix)
@@ -227,6 +229,7 @@ export async function cierreDeDiaPostHandler(req, res) {
             const { jsonToGuruSoft, consecutivoObj } = await getJsonForGuruSoft({ orderId, esConsumidorFinal: true }, locacion, locacionData)
             console.log('JSON hacia GS: ', JSON.stringify(jsonToGuruSoft))
             let resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
+            // let resultadoFactura = { Estado: '2' }
             console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
 
             if (resultadoFactura && resultadoFactura.Estado !== '2' && resultadoFactura.Estado !== '20') {
@@ -239,6 +242,7 @@ export async function cierreDeDiaPostHandler(req, res) {
               }
               console.log('🚀 ~ file: facturar.handlers.js:17 ~ facturarHandler ~ jsonToGuruSoft:', JSON.stringify(jsonToGuruSoft))
               resultadoFactura = await enviarFactura(jsonToGuruSoft, locacionData)
+              // resultadoFactura = { Estado: '2' }
               console.log('Respuesta de GS: ', JSON.stringify(resultadoFactura))
             }
 
@@ -274,15 +278,15 @@ export async function cierreDeDiaPostHandler(req, res) {
         console.log('ORDENES ERROR: ', ordenesError.length)
 
         const tmpLastDate = getRowValue(order, 'closed')
-        // log(`ORDER: ${orderId} --- CLOSED: ${tmpLastDate}`)
+        log(`ORDER: ${orderId} --- CLOSED: ${tmpLastDate}`)
 
         if (!lastDate || moment(tmpLastDate).isAfter(moment(lastDate))) {
           lastDate = tmpLastDate
         }
       }
       orders = await LavuService.getEndOfDayOrders(lastDate, endDate, envPrefix)
-      // log(`Last Date: ${lastDate}`)
-      // log(`End Date: ${endDate}`)
+      log(`Last Date: ${lastDate}`)
+      log(`End Date: ${endDate}`)
     }
 
     console.log('----- FINALIZA PROCESO ------')
@@ -294,8 +298,8 @@ export async function cierreDeDiaPostHandler(req, res) {
         ordenesPorConfirmar: { ordenes: ordenesPorConfirmar, count: ordenesPorConfirmar.length },
         ordenesError: { ordenes: ordenesError, count: ordenesError.length },
       },
-      locacion,
-      locacionData.mailReceivers
+      locacion
+      // locacionData.mailReceivers
     )
   } catch (error) {
     const errorData = {
