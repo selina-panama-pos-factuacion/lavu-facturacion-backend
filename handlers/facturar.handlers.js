@@ -185,8 +185,8 @@ export async function cierreDeDiaPostHandler(req, res) {
     let lastDate = ''
 
     const cierreObj = await Cierres.findOne({ where: { locacion } })
-    // const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
-    const endDate = moment('2024-02-06 04:00:00').format('YYYY-MM-DD HH:mm:ss')
+    const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
+    // const endDate = moment('2024-02-06 04:00:00').format('YYYY-MM-DD HH:mm:ss')
     console.log('🚀 ~ file: facturar.handlers.js:184 ~ cierreDeDiaPostHandler ~ endDate:', endDate)
 
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate, envPrefix)
