@@ -6,12 +6,6 @@ import LavuService from '../services/LavuService.js'
 import Cierres from '../models/cierres.js'
 import FacturasContribuyentes from '../models/facturas_contribuyentes.js'
 import moment from 'moment'
-import fs from 'fs'
-
-const logStream = fs.createWriteStream('log.txt', { flags: 'a' })
-const log = message => {
-  logStream.write(message + '\n')
-}
 
 export async function facturarHandler(req, res) {
   try {
@@ -192,7 +186,7 @@ export async function cierreDeDiaPostHandler(req, res) {
 
     const cierreObj = await Cierres.findOne({ where: { locacion } })
     // const endDate = moment().subtract(5, 'hours').format('YYYY-MM-DD HH:mm:ss')
-    const endDate = moment(cierreObj.ultimo).add(1, 'days').format('YYYY-MM-DD HH:mm:ss')
+    const endDate = moment('2024-02-06 04:00:00').format('YYYY-MM-DD HH:mm:ss')
     console.log('🚀 ~ file: facturar.handlers.js:184 ~ cierreDeDiaPostHandler ~ endDate:', endDate)
 
     let orders = await LavuService.getEndOfDayOrders(cierreObj.ultimo, endDate, envPrefix)
@@ -278,15 +272,12 @@ export async function cierreDeDiaPostHandler(req, res) {
         console.log('ORDENES ERROR: ', ordenesError.length)
 
         const tmpLastDate = getRowValue(order, 'closed')
-        log(`ORDER: ${orderId} --- CLOSED: ${tmpLastDate}`)
 
         if (!lastDate || moment(tmpLastDate).isAfter(moment(lastDate))) {
           lastDate = tmpLastDate
         }
       }
       orders = await LavuService.getEndOfDayOrders(lastDate, endDate, envPrefix)
-      log(`Last Date: ${lastDate}`)
-      log(`End Date: ${endDate}`)
     }
 
     console.log('----- FINALIZA PROCESO ------')
@@ -298,15 +289,15 @@ export async function cierreDeDiaPostHandler(req, res) {
         ordenesPorConfirmar: { ordenes: ordenesPorConfirmar, count: ordenesPorConfirmar.length },
         ordenesError: { ordenes: ordenesError, count: ordenesError.length },
       },
-      locacion
-      // locacionData.mailReceivers
+      locacion,
+      locacionData.mailReceivers
     )
   } catch (error) {
     const errorData = {
       message: 'Internal Server Error',
       error: error.message,
     }
-    console.log('🚀 ~ file: facturar.handlers.js:287 ~ cierreDeDiaPostHandler ~ errorData:', errorData)
+    console.log('🚀 ~ file: facturar.handlers.js:287 ~ cierreDeDiaPostHandler ~ errorData:', JSON.stringify(error))
     sendMail(errorData, locacion)
   }
 }
