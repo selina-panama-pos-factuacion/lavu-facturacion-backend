@@ -56,6 +56,7 @@ export async function getJsonForGuruSoft(body, locacion, locacionData) {
   if (esContribuyente) {
     // Llenar datos de receptor
     jsonToGuruSoft.Receptor.iTipoRec = `0${codigoTipoContribuyente}`
+    jsonToGuruSoft.Receptor.dNombRec = nombreRazonSocial
     if (codigoTipoContribuyente === 4) {
       //  Extranjero
       jsonToGuruSoft.Receptor.dPaisExt = paisSeleccionado.nombre
@@ -72,7 +73,6 @@ export async function getJsonForGuruSoft(body, locacion, locacionData) {
       jsonToGuruSoft.Receptor.dDistr = jsonToGuruSoft.Receptor.dDistr.trim()
       jsonToGuruSoft.Receptor.dCorreg = jsonToGuruSoft.Receptor.dCorreg.trim()
       if (jsonToGuruSoft.Receptor.dCodUbi === '--') jsonToGuruSoft.Receptor.dCodUbi = '8-8-1'
-      jsonToGuruSoft.Receptor.dNombRec = nombreRazonSocial
       jsonToGuruSoft.Receptor.dDirecRec = direccionCliente
     }
   }
